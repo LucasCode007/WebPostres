@@ -22,7 +22,7 @@ const crearPostre = async (req, res) => {
     console.log(err);
 
     if (err.code === "23505") {
-      return res.status(400).json({ error: "Postre duplicado" });
+      return res.status(400).json({ error: "El postre ya existe" });
     }
 
     res.status(500).json({ error: err.message });
