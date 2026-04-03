@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Postres</title>
+
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 20px;
+    }
+
+    input {
+      padding: 8px;
+      margin-right: 5px;
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    button {
+      padding: 8px 12px;
+      background: #888;
+      border: none;
+      cursor: pointer;
+    }
+
+    table {
+      margin-top: 15px;
+      border-collapse: collapse;
+      width: 60%;
+    }
+
+    th, td {
+      border: 1px solid #555;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #111;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Ingresar Postre</h2>
+
+  <input id="nombre" placeholder="Nombre del postre">
+  <input id="tiempo" type="number" placeholder="Tiempo en minutos">
+  <button onclick="guardar()">Guardar</button>
+
+  <hr>
+
+  <h2>Lista de Postres</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tiempo (min)</th>
+        <th>Unidad Alfajor</th>
+      </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+  </table>
+
+  <script>
+    const API = "http://localhost:3000/api/postres";
+
+    // 🔹 Guardar postre
+    async function guardar() {
+      const nombre = document.getElementById("nombre").value;
+      const tiempo = document.getElementById("tiempo").value;
+
+      if (!nombre || !tiempo) {
+        alert("Completa todos los campos");
+        return;
+      }
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ nombre, tiempo })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error);
+          return;
+        }
+
+        document.getElementById("nombre").value = "";
+        document.getElementById("tiempo").value = "";
+
+        cargar();
+
+      } catch (err) {
+        console.error(err);
+        alert("Error al conectar con el servidor");
+      }
+    }
+
+    // 🔹 Cargar lista
+    async function cargar() {
+      try {
+        const res = await fetch(API);
+        const data = await res.json();
+
+        const tabla = document.getElementById("tabla");
+        tabla.innerHTML = "";
+
+        data.forEach(p => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${p.nombre}</td>
+              <td>${p.tiempo}</td>
+              <td>${parseFloat(p.alfajores).toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 🔹 Cargar al iniciar
+    cargar();
+  </script>
+
+</body>
+</html>
